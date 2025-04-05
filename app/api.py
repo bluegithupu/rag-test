@@ -3,11 +3,21 @@ API endpoints for the RAG system.
 """
 from typing import List, Dict, Any, Optional
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app.rag_pipeline import RAGPipeline
 
 # Initialize FastAPI app
 app = FastAPI(title="RAG System API")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允许所有来源，生产环境中应该限制
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有方法
+    allow_headers=["*"],  # 允许所有头
+)
 
 # Initialize RAG pipeline
 rag_pipeline = RAGPipeline()
@@ -32,14 +42,24 @@ class QueryResponse(BaseModel):
     answer: str
 
 # Define API endpoints
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint.
+
+    Returns:
+        Status message
+    """
+    return {"status": "ok", "message": "RAG API is running"}
+
 @app.post("/index", response_model=Dict[str, int])
 async def index_documents(request: IndexRequest):
     """
     Index documents from a source.
-    
+
     Args:
         request: Index request
-        
+
     Returns:
         Number of documents indexed
     """
@@ -56,10 +76,10 @@ async def index_documents(request: IndexRequest):
 async def index_urls(request: IndexURLsRequest):
     """
     Index documents from URLs.
-    
+
     Args:
         request: Index URLs request
-        
+
     Returns:
         Number of documents indexed
     """
@@ -73,10 +93,10 @@ async def index_urls(request: IndexURLsRequest):
 async def query(request: QueryRequest):
     """
     Query the RAG system.
-    
+
     Args:
         request: Query request
-        
+
     Returns:
         Generated response
     """
@@ -93,7 +113,7 @@ async def query(request: QueryRequest):
 async def clear_index():
     """
     Clear the document index.
-    
+
     Returns:
         Success message
     """
