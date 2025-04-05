@@ -51,8 +51,28 @@ class QueryRequest(BaseModel):
     question: str
     filter: Optional[Dict[str, Any]] = None
 
+class ReferenceModel(BaseModel):
+    """Model for a reference."""
+    id: int
+    source: str
+    title: str
+    page: Optional[int] = None
+    url: Optional[str] = None
+    chunk_id: Optional[str] = None
+
+class DocumentModel(BaseModel):
+    """Model for a document."""
+    content: str
+    metadata: Dict[str, Any]
+
+class QueryResponseWithCitations(BaseModel):
+    """Response model for queries with citations."""
+    answer: str
+    references: List[ReferenceModel]
+    relevant_docs: List[DocumentModel]
+
 class QueryResponse(BaseModel):
-    """Response model for queries."""
+    """Response model for queries (legacy)."""
     answer: str
 
 # Define API endpoints
@@ -111,10 +131,36 @@ async def index_urls(request: IndexURLsRequest):
         api_logger.error(f"索引 URL 出错: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/query-with-citations", response_model=QueryResponseWithCitations)
+async def query_with_citations(request: QueryRequest):
+    """
+    Query the RAG system with citations.
+
+    Args:
+        request: Query request
+
+    Returns:
+        Generated response with citations
+    """
+    api_logger.info(f"查询请求(带引用): '{request.question[:50]}{'...' if len(request.question) > 50 else ''}")
+    if request.filter:
+        api_logger.debug(f"查询过滤器: {request.filter}")
+
+    try:
+        result = rag_pipeline.query_with_citations(
+            question=request.question,
+            filter=request.filter
+        )
+        api_logger.info(f"查询成功(带引用), 响应长度: {len(result['answer'])} 字符")
+        return result
+    except Exception as e:
+        api_logger.error(f"查询出错: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/query", response_model=QueryResponse)
 async def query(request: QueryRequest):
     """
-    Query the RAG system.
+    Query the RAG system (legacy endpoint).
 
     Args:
         request: Query request
@@ -122,7 +168,9 @@ async def query(request: QueryRequest):
     Returns:
         Generated response
     """
-    api_logger.info(f"查询请求: '{request.question[:50]}{'...' if len(request.question) > 50 else ''}")
+    api_logger.info(f"查询请求(旧端点): '{request.question[:50]}{'...' if len(request.question) > 50 else ''}")
+    api_logger.warning("使用旧的查询端点，建议使用 /query-with-citations")
+
     if request.filter:
         api_logger.debug(f"查询过滤器: {request.filter}")
 

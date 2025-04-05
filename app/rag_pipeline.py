@@ -117,23 +117,23 @@ class RAGPipeline:
             self.logger.error(f"从 URL 索引文档出错: {str(e)}", exc_info=True)
             raise
 
-    @log_function_call(logger=get_logger("rag_system.pipeline.query"))
-    def query(
+    @log_function_call(logger=get_logger("rag_system.pipeline.query_with_citations"))
+    def query_with_citations(
         self,
         question: str,
         filter: Optional[Dict[str, Any]] = None
-    ) -> str:
+    ) -> Dict[str, Any]:
         """
-        Query the RAG system.
+        Query the RAG system with citations.
 
         Args:
             question: User question
             filter: Metadata filter
 
         Returns:
-            Generated response
+            Dictionary containing the answer, references, and relevant documents
         """
-        self.logger.info(f"查询 RAG 系统, 问题: '{question[:50]}{'...' if len(question) > 50 else ''}")
+        self.logger.info(f"查询 RAG 系统并包含引用, 问题: '{question[:50]}{'...' if len(question) > 50 else ''}")
         if filter:
             self.logger.debug(f"使用过滤器: {filter}")
 
@@ -143,12 +143,39 @@ class RAGPipeline:
             documents = self.retriever.get_relevant_documents(question, filter)
             self.logger.info(f"检索到 {len(documents)} 个相关文档")
 
-            # Generate response
-            self.logger.debug("生成响应")
-            response = self.llm_interface.generate_response(question, documents)
+            # Generate response with citations
+            self.logger.debug("生成带引用的响应")
+            result = self.llm_interface.generate_response_with_citations(question, documents)
 
-            self.logger.info(f"生成响应成功, 长度: {len(response)} 字符")
-            return response
+            self.logger.info(f"生成带引用的响应成功, 长度: {len(result['answer'])} 字符")
+            return result
+        except Exception as e:
+            self.logger.error(f"查询出错: {str(e)}", exc_info=True)
+            raise
+
+    @log_function_call(logger=get_logger("rag_system.pipeline.query"))
+    def query(
+        self,
+        question: str,
+        filter: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Query the RAG system (legacy method).
+
+        Args:
+            question: User question
+            filter: Metadata filter
+
+        Returns:
+            Generated response
+        """
+        self.logger.info(f"查询 RAG 系统(旧方法), 问题: '{question[:50]}{'...' if len(question) > 50 else ''}")
+        self.logger.warning("使用旧的查询方法，建议使用 query_with_citations")
+
+        try:
+            # 调用新方法并只返回答案部分
+            result = self.query_with_citations(question, filter)
+            return result["answer"]
         except Exception as e:
             self.logger.error(f"查询出错: {str(e)}", exc_info=True)
             raise

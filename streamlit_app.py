@@ -46,16 +46,28 @@ with tab1:
     # 查询输入
     query = st.text_area("输入您的问题", height=100)
 
+    # 查询选项
+    show_citations = st.checkbox("显示引用信息", value=True, help="在回答中包含引用信息")
+    show_sources = st.checkbox("显示原文", value=False, help="显示检索到的原文内容")
+
     # 查询按钮
     if st.button("提交查询", key="query_button", disabled=not api_status):
         if query:
             with st.spinner("正在生成回答..."):
                 try:
                     # 调用查询 API
-                    response = requests.post(
-                        f"{api_url}/query",
-                        json={"question": query, "filter": None}
-                    )
+                    if show_citations:
+                        # 使用带引用的 API
+                        response = requests.post(
+                            f"{api_url}/query-with-citations",
+                            json={"question": query, "filter": None}
+                        )
+                    else:
+                        # 使用普通 API
+                        response = requests.post(
+                            f"{api_url}/query",
+                            json={"question": query, "filter": None}
+                        )
 
                     if response.status_code == 200:
                         result = response.json()
@@ -64,6 +76,30 @@ with tab1:
                         # 显示回答
                         st.subheader("回答:")
                         st.markdown(result["answer"])
+
+                        # 如果使用了带引用的 API，显示引用信息
+                        if show_citations and "references" in result:
+                            st.subheader("引用来源:")
+                            references = result["references"]
+
+                            for ref in references:
+                                with st.expander(f"[{ref['id']}] {ref['title']}"):
+                                    st.markdown(f"**来源:** {ref['source']}")
+                                    if "page" in ref and ref["page"]:
+                                        st.markdown(f"**页码:** {ref['page']}")
+                                    if "url" in ref and ref["url"]:
+                                        st.markdown(f"**URL:** [{ref['url']}]({ref['url']})")
+
+                        # 如果选择显示原文，显示检索到的文档
+                        if show_sources and "relevant_docs" in result:
+                            st.subheader("检索到的原文:")
+                            docs = result["relevant_docs"]
+
+                            for i, doc in enumerate(docs):
+                                with st.expander(f"文档 {i+1}"):
+                                    st.markdown(f"```\n{doc['content']}\n```")
+                                    st.markdown("**元数据:**")
+                                    st.json(doc["metadata"])
                     else:
                         st.error(f"查询失败: {response.text}")
                 except Exception as e:
@@ -203,10 +239,19 @@ with st.sidebar.expander("使用帮助"):
     ### 如何使用
 
     1. **查询**：在查询标签页输入问题并点击提交
+       - 勾选“显示引用信息”可以查看回答的来源
+       - 勾选“显示原文”可以查看检索到的原始文档
     2. **上传文档**：在文档管理标签页上传文件并索引
     3. **索引目录**：输入本地目录路径进行索引
     4. **索引网页**：输入网页 URL 进行索引
     5. **清除索引**：清除所有已索引的文档
+
+    ### 引用功能
+
+    系统现在支持引用功能，可以显示回答的来源信息：
+    - 回答中的数字引用（如 [1], [2]）对应于引用来源部分的条目
+    - 点击引用条目可以展开查看详细信息
+    - “显示原文”选项可以查看完整的检索文档
 
     ### 注意事项
 
