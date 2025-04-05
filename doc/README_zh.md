@@ -96,6 +96,29 @@ API 端点：
 - `CHUNK_SIZE`：文本块的大小
 - `CHUNK_OVERLAP`：块之间的重叠
 - `NUM_DOCUMENTS`：要检索的文档数量
+- `LOG_LEVEL`：日志级别（debug、info、warning、error、critical）
+- `LOG_TO_CONSOLE`：是否输出日志到控制台（true/false）
+- `LOG_TO_FILE`：是否输出日志到文件（true/false）
+
+## 日志系统
+
+系统包含一个全面的日志系统，用于调试和监控：
+
+- 日志存储在 `logs` 目录中，文件名格式为 `rag_system_YYYY-MM-DD.log`
+- 实现了日志轮转功能，防止日志文件过大
+- 支持不同的日志级别：debug、info、warning、error、critical
+- 每个组件都有自己的日志记录器，便于更好的组织
+- 提供函数调用跟踪功能用于调试
+
+查看日志：
+
+```bash
+# 查看最新的日志文件
+cat logs/rag_system_$(date +%Y-%m-%d).log
+
+# 实时跟踪日志更新
+tail -f logs/rag_system_$(date +%Y-%m-%d).log
+```
 
 ## 项目结构
 
@@ -111,12 +134,14 @@ rag-system/
 │   ├── retriever.py        # 文档检索逻辑
 │   ├── llm.py              # LLM 接口
 │   ├── rag_pipeline.py     # 主 RAG 协调
+│   ├── logger.py           # 日志系统
 │   └── api.py              # API 端点
 ├── cli.py                  # 命令行界面
 ├── server.py               # Web 服务器入口点
 ├── requirements.txt        # 项目依赖项
 ├── .env.example            # 环境变量示例
-└── README.md               # 项目文档
+├── logs/                   # 日志文件目录
+└── doc/                    # 文档
 ```
 
 ## 许可证

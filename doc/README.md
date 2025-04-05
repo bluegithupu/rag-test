@@ -96,6 +96,29 @@ Configuration options are available in the `.env` file:
 - `CHUNK_SIZE`: Size of text chunks
 - `CHUNK_OVERLAP`: Overlap between chunks
 - `NUM_DOCUMENTS`: Number of documents to retrieve
+- `LOG_LEVEL`: Logging level (debug, info, warning, error, critical)
+- `LOG_TO_CONSOLE`: Whether to log to console (true/false)
+- `LOG_TO_FILE`: Whether to log to file (true/false)
+
+## Logging System
+
+The system includes a comprehensive logging system for debugging and monitoring:
+
+- Logs are stored in the `logs` directory with the format `rag_system_YYYY-MM-DD.log`
+- Log rotation is implemented to prevent log files from growing too large
+- Different log levels are supported: debug, info, warning, error, critical
+- Each component has its own logger for better organization
+- Function call tracing is available for debugging
+
+To view logs:
+
+```bash
+# View the latest log file
+cat logs/rag_system_$(date +%Y-%m-%d).log
+
+# Follow log updates in real-time
+tail -f logs/rag_system_$(date +%Y-%m-%d).log
+```
 
 ## Project Structure
 
@@ -111,12 +134,14 @@ rag-system/
 │   ├── retriever.py        # Document retrieval logic
 │   ├── llm.py              # LLM interface
 │   ├── rag_pipeline.py     # Main RAG orchestration
+│   ├── logger.py           # Logging system
 │   └── api.py              # API endpoints
 ├── cli.py                  # Command-line interface
 ├── server.py               # Web server entry point
 ├── requirements.txt        # Project dependencies
 ├── .env.example            # Example environment variables
-└── README.md               # Project documentation
+├── logs/                   # Log files directory
+└── doc/                    # Documentation
 ```
 
 ## License
