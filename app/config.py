@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     # Retrieval settings
     num_documents: int = Field(default=int(os.getenv("NUM_DOCUMENTS", "4")))
 
+    # Logging settings
+    log_level: str = Field(default=os.getenv("LOG_LEVEL", "info"))
+    log_to_console: bool = Field(default=os.getenv("LOG_TO_CONSOLE", "true").lower() == "true")
+    log_to_file: bool = Field(default=os.getenv("LOG_TO_FILE", "true").lower() == "true")
+
     class Config:
         """Pydantic config."""
         env_file = ".env"

@@ -31,6 +31,10 @@ ENV/
 data/vectordb/
 data/test_vectordb/
 
+# Logs
+logs/
+*.log
+
 # IDE
 .idea/
 .vscode/
