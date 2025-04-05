@@ -9,7 +9,7 @@ from app.config import settings
 class EmbeddingGenerator:
     """Generates embeddings for documents."""
 
-    def __init__(self, model_name: str = settings.embedding_model, use_openai: bool = True):
+    def __init__(self, model_name: str = settings.embedding_model, use_openai: bool = False):
         """
         Initialize the embedding generator.
 
