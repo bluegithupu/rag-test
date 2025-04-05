@@ -1,0 +1,41 @@
+Retrieval-Augmented Generation (RAG)
+
+Retrieval-Augmented Generation (RAG) is a technique that enhances Large Language Models (LLMs) by combining them with a retrieval system. RAG systems retrieve relevant information from a knowledge base before generating responses, which helps to ground the model's outputs in factual information.
+
+Key Components of RAG:
+
+1. Document Loader: Imports documents from various sources like files, databases, or web pages.
+
+2. Document Processor: Splits documents into manageable chunks and processes them for indexing.
+
+3. Embedding Model: Converts text into vector representations that capture semantic meaning.
+
+4. Vector Store: Stores document embeddings and enables efficient similarity search.
+
+5. Retriever: Fetches relevant documents based on the similarity between the query and document embeddings.
+
+6. LLM: Generates responses based on the retrieved information and the original query.
+
+Benefits of RAG:
+
+- Reduces hallucinations by grounding responses in retrieved information
+- Enables access to domain-specific knowledge not present in the LLM's training data
+- Provides up-to-date information beyond the LLM's knowledge cutoff
+- Allows for source attribution and verification
+- Reduces the need for fine-tuning on domain-specific data
+
+Common RAG Architectures:
+
+1. Basic RAG: Query → Retrieve → Generate
+2. Advanced RAG: Query → Query Transformation → Retrieve → Rerank → Generate
+3. Iterative RAG: Query → Retrieve → Generate → Refine Query → Retrieve → Generate
+
+Challenges in RAG:
+
+- Ensuring retrieval quality and relevance
+- Balancing between retrieved information and model knowledge
+- Handling contradictory information
+- Managing retrieval latency
+- Optimizing chunk size and overlap
+
+RAG has become a fundamental technique in building reliable AI systems that can access and reason over specific knowledge bases while leveraging the general capabilities of large language models.
